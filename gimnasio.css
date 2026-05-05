@@ -265,6 +265,7 @@ main {
 .routine-name {
   font-size: .92rem; font-weight: 600;
   display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0;
+  flex-wrap: wrap; /* allow tags to wrap */
 }
 .routine-name-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .routine-tag {

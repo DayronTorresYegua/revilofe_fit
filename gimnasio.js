@@ -13,7 +13,7 @@ function saveData(data) {
 
 let appData = loadData();
 // appData.days     = { "YYYY-MM-DD": true/false }
-// appData.routines = [ { id, name, group, exercises: [{name, sets, reps, weight, unit}] } ]
+// appData.routines = [ { id, name, group: [], exercises: [{name, sets, reps, weight, unit}] } ]
 if (!appData.days)     appData.days     = {};
 if (!appData.routines) appData.routines = [];
 
@@ -257,10 +257,11 @@ function renderRoutines() {
     return;
   }
   appData.routines.forEach(r => {
-    const gc = r.group ? (GROUP_COLORS[r.group] || {}) : {};
-    const groupTag = r.group
-      ? `<span class="routine-group-tag" style="background:${gc.bg};color:${gc.color};">${r.group}</span>`
-      : '';
+    const groups = Array.isArray(r.group) ? r.group : (r.group ? [r.group] : []);
+    const groupTags = groups.map(g => {
+      const gc = GROUP_COLORS[g] || {};
+      return `<span class="routine-group-tag" style="background:${gc.bg};color:${gc.color};">${g}</span>`;
+    }).join(' ');
     const item = document.createElement('div');
     item.className = 'routine-item';
     item.innerHTML = `
@@ -268,7 +269,7 @@ function renderRoutines() {
         <div class="routine-name">
           <span>💪</span>
           <span class="routine-name-text">${escHtml(r.name)}</span>
-          ${groupTag}
+          ${groupTags}
           <span class="routine-tag">${r.exercises.length} ejerc.</span>
         </div>
         <div class="routine-actions">
@@ -310,25 +311,17 @@ let selectedGroup = '';
 function initMuscleTags() {
   document.querySelectorAll('.muscle-tag-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const tag = btn.dataset.tag;
-      if (selectedGroup === tag) {
-        selectedGroup = '';
-        btn.classList.remove('active');
-      } else {
-        document.querySelectorAll('.muscle-tag-btn').forEach(b => b.classList.remove('active'));
-        selectedGroup = tag;
-        btn.classList.add('active');
-      }
-      document.getElementById('routine-group-input').value = selectedGroup;
+      btn.classList.toggle('active');
+      // Update hidden input with comma separated values for convenience if needed, 
+      // but saveRoutine will query the DOM directly now.
     });
   });
 }
 
-function setActiveMuscleTag(group) {
-  selectedGroup = group || '';
-  document.getElementById('routine-group-input').value = selectedGroup;
+function setActiveMuscleTags(groups) {
+  const groupArr = Array.isArray(groups) ? groups : (groups ? [groups] : []);
   document.querySelectorAll('.muscle-tag-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.tag === selectedGroup);
+    b.classList.toggle('active', groupArr.includes(b.dataset.tag));
   });
 }
 
@@ -339,7 +332,7 @@ function openRoutineModal(name = '', exercises = [], id = null, group = '') {
   document.getElementById('routine-name-input').value = name;
   document.getElementById('exercise-fields').innerHTML = '';
   exFieldCount = 0;
-  setActiveMuscleTag(group);
+  setActiveMuscleTags(group);
   exercises.forEach(e => addExerciseField(e.name, e.sets, e.reps, e.weight || '', e.unit || 'kg'));
   if (exercises.length === 0) addExerciseField();
   document.getElementById('modal-overlay').classList.add('show');
@@ -407,7 +400,8 @@ function saveRoutine() {
     setTimeout(() => inp.style.borderColor = '', 1500);
     return;
   }
-  const group = document.getElementById('routine-group-input').value;
+  const groupElements = document.querySelectorAll('.muscle-tag-btn.active');
+  const group = Array.from(groupElements).map(el => el.dataset.tag);
   const rows  = document.querySelectorAll('#exercise-fields .exercise-field-row');
   const exercises = [];
   rows.forEach(r => {
