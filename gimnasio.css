@@ -202,36 +202,34 @@ main {
 }
 
 /* ===== STREAK SECTION ===== */
-.streak-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-}
 .streak-box {
   background: var(--bg-card2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 14px 16px;
+  padding: 16px 20px;
 }
 .streak-box .label { font-size: .72rem; color: var(--text-soft); font-weight: 500; margin-bottom: 4px; }
-.streak-box .value { font-size: 1.8rem; font-weight: 800; line-height: 1; }
-.streak-box .sub   { font-size: .72rem; color: var(--text-soft); margin-top: 2px; }
+.streak-box .value { font-size: 2.2rem; font-weight: 800; line-height: 1; color: var(--accent); }
+.streak-box .sub   { font-size: .75rem; color: var(--text-soft); margin-top: 6px; }
 
 .medals-row {
-  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px;
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px;
 }
 .medal-chip {
   display: flex; align-items: center; gap: 6px;
   padding: 6px 12px; border-radius: 99px;
   font-size: .78rem; font-weight: 600;
+  transition: var(--transition);
 }
 .medal-chip.bronze { background: var(--bronze-lt); color: var(--bronze); }
 .medal-chip.silver { background: var(--silver-lt); color: var(--silver); }
 .medal-chip.gold   { background: var(--gold-lt);   color: var(--gold);   }
 .medal-chip.diamond{ background: #e8f0fe; color: #3c5bb5; }
-.medal-chip.inactive { opacity: .35; filter: grayscale(1); }
+.medal-chip.inactive { opacity: .25; filter: grayscale(1); }
 .medal-chip .icon  { font-size: 1rem; }
 
 .progress-bar-wrap {
-  margin-top: 14px;
+  margin-top: 18px;
 }
 .progress-label {
   display: flex; justify-content: space-between;
@@ -247,6 +245,7 @@ main {
   background: linear-gradient(90deg, #4a7c59, #70b88a);
   transition: width .6s cubic-bezier(.4,0,.2,1);
 }
+
 
 /* ===== ROUTINES ===== */
 .routine-list { display: flex; flex-direction: column; gap: 10px; }

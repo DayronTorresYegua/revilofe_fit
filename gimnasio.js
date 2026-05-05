@@ -143,18 +143,15 @@ function updateAlerts() {
   }
 }
 
-/* ================================================
-   STREAK & MEDALS
-   ================================================ */
 const MEDALS = [
-  { id: 'bronze-2',   label: '🥉 Bronce',   weeks: 2,   cls: 'bronze'  },
-  { id: 'bronze-4',   label: '🥉 Bronce+',  weeks: 4,   cls: 'bronze'  },
-  { id: 'silver-5',   label: '🥈 Plata',    weeks: 5,   cls: 'silver'  },
-  { id: 'silver-8',   label: '🥈 Plata+',   weeks: 8,   cls: 'silver'  },
-  { id: 'gold-10',    label: '🥇 Oro',      weeks: 10,  cls: 'gold'    },
-  { id: 'gold-16',    label: '🥇 Oro+',     weeks: 16,  cls: 'gold'    },
-  { id: 'diamond-26', label: '💎 Diamante', weeks: 26,  cls: 'diamond' },
-  { id: 'diamond-52', label: '💎 Leyenda',  weeks: 52,  cls: 'diamond' },
+  { label: '🥉 Bronce',   days: 7,   cls: 'bronze'  },
+  { label: '🥉 Bronce+',  days: 15,  cls: 'bronze'  },
+  { label: '🥈 Plata',    days: 30,  cls: 'silver'  },
+  { label: '🥈 Plata+',   days: 60,  cls: 'silver'  },
+  { label: '🥇 Oro',      days: 100, cls: 'gold'    },
+  { label: '🥇 Oro+',     days: 180, cls: 'gold'    },
+  { label: '💎 Diamante', days: 270, cls: 'diamond' },
+  { label: '🏆 Leyenda',  days: 365, cls: 'diamond' },
 ];
 
 function updateStreak() {
@@ -167,63 +164,54 @@ function updateStreak() {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     const key = toKey(d.getFullYear(), d.getMonth(), d.getDate());
-    if (appData.days[key] === true) { dayStreak++; } else { break; }
+    if (appData.days[key] === true) { dayStreak++; } 
+    else if (i > 0) { break; } // Allow 0 streak if not gone today, but if gone yesterday it should count? 
+    // Actually dayStreak logic usually is "consecutive up to yesterday or today".
+    // Let's refine Day Streak:
   }
-
-  // Week streak (≥3 days/week counts)
-  let weekStreak = 0;
-  let weekCheck  = 0;
-  while (true) {
-    let hits = 0, total = 0;
-    for (let d = 0; d < 7; d++) {
-      const day = new Date(today);
-      day.setDate(day.getDate() - (weekCheck * 7) - d);
-      const key = toKey(day.getFullYear(), day.getMonth(), day.getDate());
-      if (day <= today) {
-        total++;
-        if (appData.days[key] === true) hits++;
-      }
+  // Standard day streak logic:
+  dayStreak = 0;
+  for (let i = 0; i < 2000; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = toKey(d.getFullYear(), d.getMonth(), d.getDate());
+    if (appData.days[key] === true) { dayStreak++; } 
+    else {
+      if (i === 0) continue; // if today is not marked, check yesterday
+      else break; // broken streak
     }
-    if (weekCheck === 0) {
-      if (hits === 0 && dayStreak === 0) break;
-      weekCheck++;
-      continue;
-    }
-    if (total === 7 && hits >= 3) { weekStreak++; weekCheck++; }
-    else { break; }
   }
 
   document.getElementById('streak-days').textContent        = dayStreak;
-  document.getElementById('streak-weeks').textContent       = weekStreak;
   document.getElementById('header-streak-val').textContent  = dayStreak;
 
   // Render medals
   const medalsRow = document.getElementById('medals-row');
   medalsRow.innerHTML = '';
   MEDALS.forEach(m => {
-    const earned = weekStreak >= m.weeks;
+    const earned = dayStreak >= m.days;
     const chip = document.createElement('div');
     chip.className = `medal-chip ${m.cls}${earned ? '' : ' inactive'}`;
-    chip.innerHTML = `<span class="icon">${m.label.split(' ')[0]}</span><span>${m.label.split(' ').slice(1).join(' ')}<br><small style="font-size:.6rem;font-weight:400;">${m.weeks} sem.</small></span>`;
-    chip.title = earned ? `¡Conseguida a las ${m.weeks} semanas!` : `Consíguela a las ${m.weeks} semanas`;
+    chip.innerHTML = `<span class="icon">${m.label.split(' ')[0]}</span><span>${m.label.split(' ').slice(1).join(' ')}<br><small style="font-size:.6rem;font-weight:400;">${m.days} días</small></span>`;
+    chip.title = earned ? `¡Conseguida a los ${m.days} días!` : `Consíguela a los ${m.days} días`;
     medalsRow.appendChild(chip);
   });
 
   // Progress bar to next medal
-  const nextMedal = MEDALS.find(m => weekStreak < m.weeks);
+  const nextMedal = MEDALS.find(m => dayStreak < m.days);
   const progWrap  = document.getElementById('progress-wrap');
   if (nextMedal) {
-    const prevMedal = [...MEDALS].reverse().find(m => weekStreak >= m.weeks);
-    const from = prevMedal ? prevMedal.weeks : 0;
-    const to   = nextMedal.weeks;
-    const pct  = Math.round(((weekStreak - from) / (to - from)) * 100);
-    document.getElementById('progress-label-text').textContent = `Próxima: ${nextMedal.label}`;
-    document.getElementById('progress-label-val').textContent  = `${weekStreak} / ${to} sem.`;
+    const prevMedal = [...MEDALS].reverse().find(m => dayStreak >= m.days);
+    const from = prevMedal ? prevMedal.days : 0;
+    const to   = nextMedal.days;
+    const pct  = Math.round(((dayStreak - from) / (to - from)) * 100);
+    document.getElementById('progress-label-text').textContent = `Próximo: ${nextMedal.label}`;
+    document.getElementById('progress-label-val').textContent  = `${dayStreak} / ${to} días`;
     document.getElementById('progress-fill').style.width = pct + '%';
     progWrap.style.display = '';
   } else {
-    document.getElementById('progress-label-text').textContent = '¡Has conseguido todas las medallas! 🏆';
-    document.getElementById('progress-label-val').textContent  = '';
+    document.getElementById('progress-label-text').textContent = '¡Nivel máximo alcanzado! 🏆';
+    document.getElementById('progress-label-val').textContent  = dayStreak + ' días';
     document.getElementById('progress-fill').style.width = '100%';
   }
 }
