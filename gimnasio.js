@@ -13,7 +13,7 @@ function saveData(data) {
 
 let appData = loadData();
 // appData.days     = { "YYYY-MM-DD": true/false }
-// appData.routines = [ { id, name, group, exercises: [{name, sets, reps, weight}] } ]
+// appData.routines = [ { id, name, group, exercises: [{name, sets, reps, weight, unit}] } ]
 if (!appData.days)     appData.days     = {};
 if (!appData.routines) appData.routines = [];
 
@@ -290,7 +290,7 @@ function renderRoutines() {
               <td style="font-weight:500;">${escHtml(e.name)}</td>
               <td><span class="ex-badge"><span>${e.sets}</span>&nbsp;×</span></td>
               <td><span class="ex-badge"><span>${e.reps}</span>&nbsp;reps</span></td>
-              <td>${e.weight ? `<span class="ex-badge kg"><span>${e.weight}</span>&nbsp;kg</span>` : '<span style="color:var(--text-soft);font-size:.72rem;">—</span>'}</td>
+              <td>${e.weight ? `<span class="ex-badge kg"><span>${e.weight}</span>&nbsp;${e.unit || 'kg'}</span>` : '<span style="color:var(--text-soft);font-size:.72rem;">—</span>'}</td>
             </tr>`).join('')}
           </tbody>
         </table>` : '<div style="font-size:.78rem;color:var(--text-soft);padding:4px 0;">Sin ejercicios añadidos.</div>'}
@@ -340,7 +340,7 @@ function openRoutineModal(name = '', exercises = [], id = null, group = '') {
   document.getElementById('exercise-fields').innerHTML = '';
   exFieldCount = 0;
   setActiveMuscleTag(group);
-  exercises.forEach(e => addExerciseField(e.name, e.sets, e.reps, e.weight || ''));
+  exercises.forEach(e => addExerciseField(e.name, e.sets, e.reps, e.weight || '', e.unit || 'kg'));
   if (exercises.length === 0) addExerciseField();
   document.getElementById('modal-overlay').classList.add('show');
   setTimeout(() => document.getElementById('routine-name-input').focus(), 100);
@@ -354,7 +354,7 @@ function closeRoutineModal() {
 // ---- ADD EXERCISE FIELD ----
 let exFieldCount = 0;
 
-function addExerciseField(name = '', sets = 3, reps = 12, weight = '') {
+function addExerciseField(name = '', sets = 3, reps = 12, weight = '', unit = 'kg') {
   exFieldCount++;
   const idx  = exFieldCount;
   const wrap = document.getElementById('exercise-fields');
@@ -364,7 +364,7 @@ function addExerciseField(name = '', sets = 3, reps = 12, weight = '') {
     <button type="button" class="remove-ex-btn" onclick="this.closest('.exercise-field-row').remove(); updateExNumbers();" title="Quitar">✕</button>
     <div class="field-group">
       <label><span class="field-ex-num">${idx}</span>Ejercicio</label>
-      <input type="text" class="ex-name-inp" placeholder="Ej: Press de banca" value="${escHtml(name)}" maxlength="60"/>
+      <input type="text" class="ex-name-inp" placeholder="Ej: Press de banca" value="${escHtml(name)}" maxlength="60" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]/g, '')"/>
     </div>
     <div class="field-row-nums">
       <div class="field-group">
@@ -375,9 +375,15 @@ function addExerciseField(name = '', sets = 3, reps = 12, weight = '') {
         <label>Reps</label>
         <input type="number" class="ex-reps-inp" min="1" max="999" value="${reps}"/>
       </div>
-      <div class="field-group">
-        <label>Peso (kg)</label>
-        <input type="number" class="ex-weight-inp" min="0" max="999" step="0.5" placeholder="—" value="${weight}"/>
+      <div class="field-group" style="flex: 1.5;">
+        <label>Peso</label>
+        <div style="display: flex; gap: 4px;">
+          <input type="number" class="ex-weight-inp" min="0" max="999" step="0.5" placeholder="—" value="${weight}" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"/>
+          <select class="ex-unit-sel" style="width: 65px; padding: 9px 4px;">
+            <option value="kg" ${unit === 'kg' ? 'selected' : ''}>kg</option>
+            <option value="lb" ${unit === 'lb' ? 'selected' : ''}>lb</option>
+          </select>
+        </div>
       </div>
     </div>`;
   wrap.appendChild(row);
@@ -409,7 +415,8 @@ function saveRoutine() {
     const s = parseInt(r.querySelector('.ex-sets-inp').value) || 3;
     const p = parseInt(r.querySelector('.ex-reps-inp').value) || 12;
     const w = parseFloat(r.querySelector('.ex-weight-inp').value) || 0;
-    if (n) exercises.push({ name: n, sets: s, reps: p, weight: w || '' });
+    const u = r.querySelector('.ex-unit-sel').value;
+    if (n) exercises.push({ name: n, sets: s, reps: p, weight: w || '', unit: u });
   });
 
   if (exercises.length === 0) {
@@ -482,7 +489,7 @@ function renderSessionBody() {
       const done = !!sessionDoneMap[key];
       return `<div class="session-set-row${done?' done':''}" onclick="toggleSessionSet('${ei}','${si}',this)">
         <div class="set-num">${si+1}</div>
-        <div class="set-info">${ex.reps} reps${ex.weight ? ' · ' + ex.weight + ' kg' : ''}</div>
+        <div class="set-info">${ex.reps} reps${ex.weight ? ' · ' + ex.weight + ' ' + (ex.unit || 'kg') : ''}</div>
         <div class="set-check">${done ? '✅' : '⬜'}</div>
       </div>`;
     }).join('');
