@@ -6,12 +6,11 @@
 ## 🚀 Características Principales
 
 - **Calendario Interactivo**: Visualiza tu asistencia mensual. Marca los días que has entrenado con un simple clic.
-- **Gestión de Rutinas**: Crea y personaliza tus rutinas de entrenamiento. Organízalas por grupos musculares (Pecho, Espalda, Pierna, etc.).
-- **Modo Entrenamiento**: Inicia una sesión activa con temporizador integrado y seguimiento de series y repeticiones en tiempo real.
+- **Gestión de Rutinas**: Crea y personaliza tus rutinas de entrenamiento. Organízalas con múltiples etiquetas de grupos musculares (Pecho, Espalda, Pierna, etc.) y elige entre kg o lb para tus ejercicios.
+- **Modo Entrenamiento**: Inicia una sesión activa con temporizador integrado y seguimiento interactivo de series y repeticiones.
 - **Sistema de Rachas y Medallas**: 
-    - **Racha Diaria**: Contador de días consecutivos entrenando.
-    - **Racha Semanal**: Mantenla asistiendo al menos 3 días por semana.
-    - **Medallas**: Desbloquea logros desde Bronce (2 semanas) hasta Leyenda (52 semanas).
+    - **Racha Diaria**: Contador de días consecutivos (mantenla entrenando hoy o ayer).
+    - **Medallas**: Desbloquea logros desde Bronce (7 días) hasta Leyenda (365 días).
 - **Alertas de Inactividad**: El sistema te avisará si llevas 4 o 6 días sin registrar actividad para motivarte a volver.
 - **Persistencia Local**: Tus datos se guardan automáticamente en tu navegador utilizando `localStorage`.
 
