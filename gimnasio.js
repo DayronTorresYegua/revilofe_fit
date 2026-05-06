@@ -158,27 +158,19 @@ function updateStreak() {
   const today = new Date();
   today.setHours(0,0,0,0);
 
-  // Consecutive day streak
+  // Day streak calculation:
+  // We check from today backwards. If today is not marked, we allow a 1-day gap 
+  // (so the streak doesn't break at 00:01 AM).
   let dayStreak = 0;
-  for (let i = 0; i < 1000; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    const key = toKey(d.getFullYear(), d.getMonth(), d.getDate());
-    if (appData.days[key] === true) { dayStreak++; } 
-    else if (i > 0) { break; } // Allow 0 streak if not gone today, but if gone yesterday it should count? 
-    // Actually dayStreak logic usually is "consecutive up to yesterday or today".
-    // Let's refine Day Streak:
-  }
-  // Standard day streak logic:
-  dayStreak = 0;
   for (let i = 0; i < 2000; i++) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     const key = toKey(d.getFullYear(), d.getMonth(), d.getDate());
-    if (appData.days[key] === true) { dayStreak++; } 
-    else {
-      if (i === 0) continue; // if today is not marked, check yesterday
-      else break; // broken streak
+    if (appData.days[key] === true) { 
+      dayStreak++; 
+    } else {
+      if (i === 0) continue; // Skip today if empty, check yesterday
+      else break; // Broken
     }
   }
 
